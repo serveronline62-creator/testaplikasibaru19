@@ -32,6 +32,7 @@
             --danger: #ef4444;
             --info: #3b82f6;
             --success: #10b981;
+            --gotw: #8b5cf6;
             --text-primary: #f1f5f9;
             --text-secondary: #94a3b8;
             --text-muted: #64748b;
@@ -68,6 +69,7 @@
             --danger: #dc2626;
             --info: #2563eb;
             --success: #059669;
+            --gotw: #7c3aed;
             --text-primary: #0f172a;
             --text-secondary: #475569;
             --text-muted: #94a3b8;
@@ -795,6 +797,10 @@
             background: rgba(168, 85, 247, 0.12);
             color: #a855f7;
         }
+        .stat-icon.gotw {
+            background: rgba(139, 92, 246, 0.12);
+            color: var(--gotw);
+        }
         .stat-icon.ready {
             background: rgba(245, 158, 11, 0.12);
             color: var(--warning);
@@ -1217,6 +1223,14 @@
         [data-theme="light"] .status-badge.proses {
             color: #9333ea;
         }
+        .status-badge.gotw {
+            background: rgba(139, 92, 246, 0.12);
+            color: #a78bfa;
+            border: 1px solid rgba(139, 92, 246, 0.2);
+        }
+        [data-theme="light"] .status-badge.gotw {
+            color: #7c3aed;
+        }
         .status-badge.ready {
             background: rgba(245, 158, 11, 0.12);
             color: #fbbf24;
@@ -1243,6 +1257,9 @@
         }
         .status-badge.proses .status-dot {
             background: #c084fc;
+        }
+        .status-badge.gotw .status-dot {
+            background: #a78bfa;
         }
         .status-badge.ready .status-dot {
             background: #fbbf24;
@@ -1764,6 +1781,7 @@
                     <div class="stat-card"><div class="stat-icon total"><i class="fas fa-clipboard-list"></i></div><div><div class="stat-value" id="statTotal">0</div><div class="stat-label">Total Aktif</div></div></div>
                     <div class="stat-card"><div class="stat-icon pending"><i class="fas fa-clock"></i></div><div><div class="stat-value" id="statPending">0</div><div class="stat-label">Pending</div></div></div>
                     <div class="stat-card"><div class="stat-icon proses"><i class="fas fa-spinner"></i></div><div><div class="stat-value" id="statProses">0</div><div class="stat-label">Proses</div></div></div>
+                    <div class="stat-card"><div class="stat-icon gotw"><i class="fas fa-truck"></i></div><div><div class="stat-value" id="statGotw">0</div><div class="stat-label">GOTW</div></div></div>
                     <div class="stat-card"><div class="stat-icon ready"><i class="fas fa-box"></i></div><div><div class="stat-value" id="statReady">0</div><div class="stat-label">Ready</div></div></div>
                 </div>
 
@@ -1775,6 +1793,7 @@
                                 <button class="chip active" onclick="filterStatus('all',this)">Semua</button>
                                 <button class="chip" onclick="filterStatus('PENDING',this)">PENDING</button>
                                 <button class="chip" onclick="filterStatus('PROSES',this)">PROSES</button>
+                                <button class="chip" onclick="filterStatus('GOTW',this)">GOTW</button>
                                 <button class="chip" onclick="filterStatus('READY',this)">READY</button>
                             </div>
                             <div class="search-box"><i class="fas fa-search"></i><input type="text" placeholder="Cari order..." id="searchInput" oninput="debouncedSearch()" /></div>
@@ -1922,6 +1941,7 @@
                     <select class="form-select" id="modalStatus">
                         <option value="PENDING">PENDING</option>
                         <option value="PROSES">PROSES</option>
+                        <option value="GOTW">GOTW</option>
                         <option value="READY">READY</option>
                         <option value="FINISH">FINISH</option>
                     </select>
@@ -2193,7 +2213,7 @@
                 document.getElementById('tableFooter').style.display = 'none';
                 document.getElementById('emptyRiwayat').style.display = 'none';
                 document.getElementById('riwayatFooter').style.display = 'none';
-                ['statTotal', 'statPending', 'statProses', 'statReady', 'statRiwayat', 'tabCountAktif', 'tabCountRiwayat']
+                ['statTotal', 'statPending', 'statProses', 'statGotw', 'statReady', 'statRiwayat', 'tabCountAktif', 'tabCountRiwayat']
                 .forEach(function(id) { document.getElementById(id).textContent = '0'; });
                 document.getElementById('loginForm').reset();
                 document.getElementById('registerForm').reset();
@@ -2357,6 +2377,7 @@
             s = (s || '').toUpperCase();
             if (s === 'PENDING') return 'pending';
             if (s === 'PROSES') return 'proses';
+            if (s === 'GOTW') return 'gotw';
             if (s === 'READY') return 'ready';
             if (s === 'FINISH') return 'finish';
             return 'pending';
@@ -2829,6 +2850,8 @@
             animateCounter('statProses', aktif.filter(function(o) { return (o['STATUS'] || '').toUpperCase() ===
                     'PROSES'; })
                 .length);
+            animateCounter('statGotw', aktif.filter(function(o) { return (o['STATUS'] || '').toUpperCase() === 'GOTW'; })
+                .length);
             animateCounter('statReady', aktif.filter(function(o) { return (o['STATUS'] || '').toUpperCase() === 'READY'; })
                 .length);
             animateCounter('statRiwayat', riwayat.length);
@@ -3088,7 +3111,7 @@
         document.getElementById('inputModal').addEventListener('click', function(e) { if (e.target === this) closeInputModal(); });
         document.getElementById('editModal').addEventListener('click', function(e) { if (e.target === this) closeEditModal(); });
 
-        console.log('✅ Aplikasi siap - User hanya bisa ubah status, Admin edit semua field.');
+        console.log('✅ Aplikasi siap - Status: PENDING, PROSES, GOTW, READY, FINISH');
     </script>
 </body>
 </html>
