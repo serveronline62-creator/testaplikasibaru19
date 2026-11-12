@@ -26,42 +26,30 @@
     }
     body {
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        background: var(--bg-app);
-        color: var(--text);
-        overflow: hidden;
-        font-size: 13px;
+        background: var(--bg-app); color: var(--text);
+        overflow: hidden; font-size: 13px;
     }
     .app { display: grid; grid-template-rows: 52px 1fr 30px; height: 100vh; }
 
-    /* TOPBAR */
     .topbar {
         display: flex; align-items: center; justify-content: space-between;
-        padding: 0 16px; background: #1a1a1f; border-bottom: 1px solid var(--border);
-        gap: 12px;
+        padding: 0 16px; background: #1a1a1f; border-bottom: 1px solid var(--border); gap: 12px;
     }
     .logo { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 15px; color: var(--text-bright); flex-shrink: 0; }
     .logo-icon {
         width: 30px; height: 30px;
         background: linear-gradient(135deg, #5b8def, #ab47bc);
-        border-radius: 7px;
-        display: flex; align-items: center; justify-content: center;
-        font-size: 16px;
-        box-shadow: 0 0 12px rgba(91,141,239,0.4);
+        border-radius: 7px; display: flex; align-items: center; justify-content: center;
+        font-size: 16px; box-shadow: 0 0 12px rgba(91,141,239,0.4);
     }
     .topbar-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
 
     .btn {
         display: inline-flex; align-items: center; gap: 6px;
-        padding: 7px 14px;
-        border: 1px solid var(--border);
-        background: var(--bg-panel-alt);
-        color: var(--text);
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 12.5px; font-weight: 500;
-        transition: all 0.15s;
-        white-space: nowrap;
-        font-family: inherit;
+        padding: 7px 14px; border: 1px solid var(--border);
+        background: var(--bg-panel-alt); color: var(--text);
+        border-radius: 6px; cursor: pointer; font-size: 12.5px; font-weight: 500;
+        transition: all 0.15s; white-space: nowrap; font-family: inherit;
     }
     .btn:hover:not(:disabled) { background: var(--bg-hover); border-color: #4a4a55; }
     .btn:disabled { opacity: 0.35; cursor: not-allowed; }
@@ -71,28 +59,18 @@
     .btn-danger:hover:not(:disabled) { background: #d32f2f; }
     .btn-sm { padding: 4px 10px; font-size: 11px; }
 
-    /* QUALITY SELECT */
     .quality-select {
-        padding: 7px 10px;
-        background: var(--bg-panel-alt);
-        border: 1px solid var(--border);
-        color: var(--text);
-        border-radius: 6px;
-        font-size: 12.5px; font-family: inherit;
-        cursor: pointer;
-        outline: none;
-        transition: all 0.15s;
+        padding: 7px 10px; background: var(--bg-panel-alt); border: 1px solid var(--border);
+        color: var(--text); border-radius: 6px; font-size: 12.5px; font-family: inherit;
+        cursor: pointer; outline: none; transition: all 0.15s;
     }
     .quality-select:hover { background: var(--bg-hover); }
     .quality-select:focus { border-color: var(--accent); }
 
-    /* RECORD BUTTON */
     .btn-record { background: #3a1f1f; border-color: #5a2a2a; color: #ff8a80; }
     .btn-record:hover:not(:disabled) { background: #4a2a2a; border-color: var(--danger); }
     .btn-record.recording {
-        background: var(--danger);
-        border-color: var(--danger);
-        color: #fff;
+        background: var(--danger); border-color: var(--danger); color: #fff;
         animation: pulse-recording 1.5s infinite;
     }
     @keyframes pulse-recording {
@@ -100,18 +78,12 @@
         50% { box-shadow: 0 0 0 8px rgba(239,83,80,0); }
     }
 
-    /* RECORD TIMER */
     .record-time {
         display: inline-flex; align-items: center; gap: 6px;
-        padding: 6px 12px;
-        background: rgba(239,83,80,0.15);
-        border: 1px solid var(--danger);
-        border-radius: 6px;
-        color: var(--danger);
-        font-size: 12px;
-        font-family: 'SF Mono', 'Monaco', monospace;
-        font-weight: 600;
-        letter-spacing: 0.5px;
+        padding: 6px 12px; background: rgba(239,83,80,0.15);
+        border: 1px solid var(--danger); border-radius: 6px;
+        color: var(--danger); font-size: 12px; font-family: 'SF Mono', 'Monaco', monospace;
+        font-weight: 600; letter-spacing: 0.5px;
     }
     .record-time::before {
         content: ''; width: 8px; height: 8px; background: var(--danger);
@@ -119,7 +91,6 @@
     }
     @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
-    /* MAIN GRID */
     .main { display: grid; grid-template-columns: 240px 1fr 320px; overflow: hidden; }
     .sidebar { background: var(--bg-panel); overflow-y: auto; display: flex; flex-direction: column; }
     .sidebar-left { border-right: 1px solid var(--border); }
@@ -131,7 +102,6 @@
         color: var(--text-dim); margin-bottom: 12px; display: flex; align-items: center; gap: 6px;
     }
 
-    /* UPLOAD */
     .upload-item {
         background: var(--bg-panel-alt); border: 1.5px dashed var(--border);
         border-radius: 8px; padding: 12px; margin-bottom: 10px; transition: all 0.2s;
@@ -146,7 +116,6 @@
     }
     .upload-item input[type="file"]::file-selector-button:hover { background: #3a3a45; }
 
-    /* TOOLS */
     .tool-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
     .tool-btn {
         display: flex; align-items: center; gap: 6px; padding: 9px 10px;
@@ -161,7 +130,6 @@
     .tool-btn.active[data-tool="transform"] { background: rgba(171,71,188,0.2); border-color: var(--purple); color: var(--purple); }
     .tool-btn .emoji { font-size: 14px; }
 
-    /* PREVIEW */
     .preview-area {
         background: repeating-conic-gradient(#0f0f12 0% 25%, #131318 0% 50%) 50% / 20px 20px;
         display: flex; align-items: center; justify-content: center;
@@ -172,6 +140,7 @@
         max-width: 100%; max-height: 100%; height: auto; width: auto;
         display: block; background: #000; border-radius: 10px;
         box-shadow: 0 12px 48px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.05);
+        transition: box-shadow 0.3s;
     }
     #cursor-overlay {
         position: absolute; pointer-events: none;
@@ -195,12 +164,10 @@
     .preview-controls .btn { padding: 6px 14px; border-radius: 20px; border-color: transparent; background: transparent; }
     .preview-controls .btn:hover:not(:disabled) { background: var(--bg-hover); }
 
-    /* REC OVERLAY BORDER */
     .preview-wrapper.recording canvas {
         box-shadow: 0 12px 48px rgba(0,0,0,0.7), 0 0 0 3px var(--danger), 0 0 20px rgba(239,83,80,0.5);
     }
 
-    /* TABS */
     .tabs { display: flex; border-bottom: 1px solid var(--border); background: #1a1a1f; }
     .tab-btn {
         flex: 1; padding: 12px 8px; background: transparent; border: none;
@@ -216,7 +183,6 @@
     .tab-content { display: none; padding: 16px; flex: 1; overflow-y: auto; }
     .tab-content.active { display: block; }
 
-    /* CONTROLS */
     .control-group { margin-bottom: 22px; }
     .control-group-title {
         font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.6px;
@@ -266,7 +232,6 @@
     .toggle-row input[type="checkbox"]:checked::after { background: #fff; left: 17px; }
     .toggle-row label { font-size: 12px; color: var(--text); cursor: pointer; flex: 1; }
 
-    /* STATUS BAR */
     .statusbar {
         display: flex; align-items: center; padding: 0 16px;
         background: #131316; border-top: 1px solid var(--border);
@@ -511,7 +476,8 @@ const RESOLUTIONS = {
     FULLHD: { w: 1920, h: 1080, bitrate: 10000000, label: 'Full HD 1080p' }
 };
 
-const ACTION_BTN_IDS = ['btn-play', 'btn-pause', 'btn-reset', 'btn-export', 'btn-record',
+// Tombol yang aktif SETELAH video dimuat. Export sementara dinonaktifkan saat recording.
+const ALL_BTN_IDS = ['btn-play', 'btn-pause', 'btn-reset', 'btn-record', 'btn-export',
     'btn-play-float', 'btn-pause-float', 'btn-reset-float',
     'btn-clear-eraser', 'btn-reset-back', 'btn-reset-front'];
 
@@ -520,8 +486,8 @@ function setStatus(msg, type = '') {
     statusbar.className = 'statusbar' + (type ? ' ' + type : '');
 }
 
-function setActionsEnabled(enabled) {
-    ACTION_BTN_IDS.forEach(id => { if ($(id)) $(id).disabled = !enabled; });
+function setAllButtonsEnabled(enabled) {
+    ALL_BTN_IDS.forEach(id => { if ($(id)) $(id).disabled = !enabled; });
 }
 
 function roundedRectPath(c, x, y, w, h, r) {
@@ -597,7 +563,8 @@ function drawVideoTransformed(context, video, prefix) {
     context.drawImage(video, drawX, drawY, drawW, drawH);
 }
 
-function drawFrame() {
+// --- RENDER BASE (tanpa handle) untuk feed recorder ---
+function drawBaseScene() {
     const w = canvas.width, h = canvas.height;
     ctx.fillStyle = '#000';
     ctx.fillRect(0, 0, w, h);
@@ -643,12 +610,10 @@ function drawFrame() {
             ctx.restore();
         }
     }
-
-    drawTransformHandles();
 }
 
 function drawTransformHandles() {
-    if (currentTool !== 'transform' || !frontLoaded || isRecording || isExporting) return;
+    if (currentTool !== 'transform' || !frontLoaded) return;
     const r = getFrontRect();
     const hs = getHandleSizeCanvas();
     ctx.save();
@@ -673,14 +638,19 @@ function drawTransformHandles() {
     ctx.restore();
 }
 
+function drawFrame() {
+    drawBaseScene();
+    drawTransformHandles();
+}
+
+// Render loop: base scene -> copy clean frame ke recordCanvas -> draw handles untuk user
+// Sehingga handle TIDAK muncul di hasil rekaman, tapi tetap terlihat di preview.
 function renderLoop() {
-    drawFrame();
-    // Salin ke canvas rekaman jika sedang merekam atau export
-    if (isRecording || isExporting) {
-        if (recordCanvas.width && recordCanvas.height) {
-            recordCtx.drawImage(canvas, 0, 0, recordCanvas.width, recordCanvas.height);
-        }
+    drawBaseScene();
+    if ((isRecording || isExporting) && recordCanvas.width) {
+        recordCtx.drawImage(canvas, 0, 0, recordCanvas.width, recordCanvas.height);
     }
+    drawTransformHandles();
     rafId = requestAnimationFrame(renderLoop);
 }
 function startLoop() { if (rafId) cancelAnimationFrame(rafId); rafId = requestAnimationFrame(renderLoop); }
@@ -725,7 +695,7 @@ function whenBothLoaded() {
     let w = Math.min(videoBack.videoWidth || 1280, 1280);
     let h = Math.round(w / ratio);
     resizeCanvases(w, h);
-    setActionsEnabled(true);
+    setAllButtonsEnabled(true);
     emptyState.style.display = 'none';
     previewControls.style.display = 'flex';
     drawFrame();
@@ -743,7 +713,6 @@ $('file-front').onchange = async (e) => {
     catch (err) { setStatus('❌ ' + err.message, 'error'); }
 };
 
-// ===== TAB SWITCHING =====
 document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', () => {
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -753,10 +722,9 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     });
 });
 
-// ===== TOOL SELECTOR =====
+// Tool selector — TIDAK diblokir saat merekam
 document.querySelectorAll('.tool-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-        if (isRecording) { setStatus('⚠️ Hentikan rekaman sebelum mengubah tool.', 'warning'); return; }
         currentTool = btn.dataset.tool;
         document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
@@ -770,10 +738,9 @@ document.querySelectorAll('.tool-btn').forEach(btn => {
     });
 });
 
-// ===== POINTER HANDLERS =====
+// Pointer handlers — TIDAK diblokir saat merekam
 function onPointerDown(e) {
     if (!backLoaded || !frontLoaded || isExporting) return;
-    if (isRecording) return; // Tidak boleh interaksi saat merekam
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
     const { x, y } = getCanvasCoords(clientX, clientY);
@@ -877,27 +844,30 @@ canvas.addEventListener('touchstart', onPointerDown, { passive: false });
 canvas.addEventListener('touchmove', onPointerMove, { passive: false });
 canvas.addEventListener('touchend', onPointerUp);
 
-// ===== PLAY / PAUSE / RESET =====
+// Play/Pause/Reset — semua tetap berfungsi saat merekam
 function doPlay() {
     if (!backLoaded || !frontLoaded) return;
     try {
         if (videoBack.ended) videoBack.currentTime = 0;
         if (videoFront.ended) videoFront.currentTime = 0;
         Promise.all([videoBack.play(), videoFront.play()]).then(() => {
-            startLoop(); setStatus('▶ Memutar...');
+            startLoop(); setStatus(isRecording ? '▶ Memutar (sambil merekam)...' : '▶ Memutar...');
         });
     } catch (err) { setStatus('❌ ' + err.message, 'error'); }
 }
 function doPause() {
-    if (isRecording) { setStatus('⚠️ Tidak bisa pause saat merekam.', 'warning'); return; }
     videoBack.pause(); videoFront.pause();
-    stopLoop(); drawFrame(); setStatus('⏸ Dijeda.');
+    // Saat merekam, biarkan loop tetap berjalan agar frame tetap dikirim ke recorder
+    if (!isRecording) stopLoop();
+    drawFrame();
+    setStatus(isRecording ? '⏸ Dijeda (rekaman tetap berjalan).' : '⏸ Dijeda.');
 }
 function doReset() {
-    if (isRecording) { setStatus('⚠️ Tidak bisa reset saat merekam.', 'warning'); return; }
     videoBack.pause(); videoFront.pause();
     videoBack.currentTime = 0; videoFront.currentTime = 0;
-    stopLoop(); drawFrame(); setStatus('↺ Video di-reset.');
+    if (!isRecording) stopLoop();
+    drawFrame();
+    setStatus(isRecording ? '↺ Video di-reset (rekaman tetap berjalan).' : '↺ Video di-reset.');
 }
 $('btn-play').onclick = doPlay;
 $('btn-play-float').onclick = doPlay;
@@ -912,7 +882,6 @@ $('btn-clear-eraser').onclick = () => {
     setStatus('🧹 Semua coretan eraser dibersihkan.', 'success');
 };
 
-// ===== SLIDER UTILS =====
 function setSliderValue(id, val, isFloat = false) {
     const el = $(id);
     let v = isFloat ? parseFloat(val) : Math.round(val);
@@ -966,8 +935,7 @@ function setupRecordCanvas(quality) {
     recordCanvas.height = res.h;
     recordCtx.fillStyle = '#000';
     recordCtx.fillRect(0, 0, res.w, res.h);
-    // Render frame pertama ke canvas rekaman
-    drawFrame();
+    drawBaseScene();
     recordCtx.drawImage(canvas, 0, 0, res.w, res.h);
     return res;
 }
@@ -1016,12 +984,11 @@ function startRecording() {
         setStatus(`✅ Rekaman ${res.label} selesai! File telah diunduh.`, 'success');
     };
 
-    // Reset video & mainkan
+    // Reset video ke awal & putar (kalau sebelumnya dijeda/ended)
     videoBack.currentTime = 0;
     videoFront.currentTime = 0;
     Promise.all([videoBack.play(), videoFront.play()]).catch(() => {});
 
-    // Pastikan render loop berjalan untuk feed frames
     if (!rafId) startLoop();
 
     mediaRecorder.start(100);
@@ -1030,9 +997,9 @@ function startRecording() {
     previewWrapper.classList.add('recording');
     $('btn-record').classList.add('recording');
     $('btn-record').textContent = '⏹ Stop';
-    // Disable action lain saat merekam
-    ['btn-play', 'btn-pause', 'btn-reset', 'btn-export', 'btn-play-float', 'btn-pause-float', 'btn-reset-float',
-     'btn-clear-eraser', 'btn-reset-back', 'btn-reset-front'].forEach(id => { if ($(id)) $(id).disabled = true; });
+
+    // HANYA tombol Export yang dinonaktifkan (karena akan menjalankan recorder kedua)
+    $('btn-export').disabled = true;
 
     // Timer
     recordStartTime = Date.now();
@@ -1044,7 +1011,7 @@ function startRecording() {
         $('record-time').textContent = formatTime(Date.now() - recordStartTime);
     }, 250);
 
-    setStatus(`🔴 Merekam ${res.label} (${res.w}×${res.h})... Klik Stop untuk berhenti.`, 'warning');
+    setStatus(`🔴 Merekam ${res.label} (${res.w}×${res.h})... Semua tool tetap aktif.`, 'warning');
 }
 
 function stopRecording() {
@@ -1060,16 +1027,14 @@ function stopRecording() {
     clearInterval(recordTimerInterval);
     $('record-time').style.display = 'none';
 
-    // Kembalikan status tombol
-    setActionsEnabled(true);
+    // Re-enable hanya export (yang tadi dinonaktifkan)
+    $('btn-export').disabled = false;
 
-    // Jika video dalam keadaan pause, hentikan loop
     if (videoBack.paused && videoFront.paused) stopLoop();
 
     setStatus('⏹ Rekaman dihentikan. File sedang diproses...', 'warning');
 }
 
-// Auto-stop saat video berakhir
 videoBack.addEventListener('ended', () => {
     if (isRecording) setTimeout(stopRecording, 200);
 });
@@ -1079,7 +1044,7 @@ $('btn-record').onclick = () => {
     else startRecording();
 };
 
-// ===== EXPORT (auto full duration, dengan kualitas) =====
+// ===== EXPORT (full durasi, tombol dinonaktifkan selama proses) =====
 $('btn-export').onclick = async () => {
     if (isExporting) return;
     if (isRecording) { setStatus('⚠️ Hentikan rekaman dulu.', 'warning'); return; }
@@ -1093,8 +1058,7 @@ $('btn-export').onclick = async () => {
     if (!mimeType) { setStatus('❌ Format WebM tidak didukung.', 'error'); return; }
 
     isExporting = true;
-    setActionsEnabled(false);
-    $('btn-record').disabled = true;
+    setAllButtonsEnabled(false);
 
     const chunks = [];
     const stream = recordCanvas.captureStream(30);
@@ -1110,8 +1074,7 @@ $('btn-export').onclick = async () => {
         setTimeout(() => URL.revokeObjectURL(url), 2000);
         setStatus(`✅ Export ${res.label} selesai!`, 'success');
         isExporting = false;
-        setActionsEnabled(true);
-        $('btn-record').disabled = false;
+        setAllButtonsEnabled(true);
     };
 
     videoBack.currentTime = 0; videoFront.currentTime = 0;
