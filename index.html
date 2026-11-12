@@ -8,26 +8,15 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { height: 100%; }
     :root {
-        --bg-app: #16161a;
-        --bg-panel: #1e1e24;
-        --bg-panel-alt: #26262e;
-        --bg-input: #131316;
-        --bg-hover: #2f2f38;
-        --border: #2e2e36;
-        --text: #d5d5dc;
-        --text-dim: #7a7a88;
-        --text-bright: #ffffff;
-        --accent: #5b8def;
-        --accent-glow: rgba(91,141,239,0.25);
-        --danger: #ef5350;
-        --success: #66bb6a;
-        --warning: #ffa726;
-        --purple: #ab47bc;
+        --bg-app: #16161a; --bg-panel: #1e1e24; --bg-panel-alt: #26262e;
+        --bg-input: #131316; --bg-hover: #2f2f38; --border: #2e2e36;
+        --text: #d5d5dc; --text-dim: #7a7a88; --text-bright: #ffffff;
+        --accent: #5b8def; --accent-glow: rgba(91,141,239,0.25);
+        --danger: #ef5350; --success: #66bb6a; --warning: #ffa726; --purple: #ab47bc;
     }
     body {
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        background: var(--bg-app); color: var(--text);
-        overflow: hidden; font-size: 13px;
+        background: var(--bg-app); color: var(--text); overflow: hidden; font-size: 13px;
     }
     .app { display: grid; grid-template-rows: 52px 1fr 30px; height: 100vh; }
 
@@ -64,8 +53,18 @@
         color: var(--text); border-radius: 6px; font-size: 12.5px; font-family: inherit;
         cursor: pointer; outline: none; transition: all 0.15s;
     }
-    .quality-select:hover { background: var(--bg-hover); }
+    .quality-select:hover:not(:disabled) { background: var(--bg-hover); }
     .quality-select:focus { border-color: var(--accent); }
+    .quality-select:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .aspect-select {
+        padding: 7px 10px; background: var(--bg-panel-alt); border: 1px solid var(--border);
+        color: var(--text); border-radius: 6px; font-size: 12.5px; font-family: inherit;
+        cursor: pointer; outline: none; transition: all 0.15s;
+    }
+    .aspect-select:hover:not(:disabled) { background: var(--bg-hover); }
+    .aspect-select:focus { border-color: var(--purple); }
+    .aspect-select:disabled { opacity: 0.4; cursor: not-allowed; }
 
     .btn-record { background: #3a1f1f; border-color: #5a2a2a; color: #ff8a80; }
     .btn-record:hover:not(:disabled) { background: #4a2a2a; border-color: var(--danger); }
@@ -271,7 +270,12 @@
         </div>
         <div class="topbar-actions">
             <span id="record-time" class="record-time" style="display:none;">00:00</span>
-            <select id="quality-select" class="quality-select" title="Resolusi rekaman">
+            <select id="aspect-select" class="aspect-select" title="Rasio layar" disabled>
+                <option value="ASLI" selected>📐 Asli</option>
+                <option value="16:9">📺 16:9</option>
+                <option value="9:16">📱 9:16</option>
+            </select>
+            <select id="quality-select" class="quality-select" title="Kualitas rekaman">
                 <option value="SD">SD 480p</option>
                 <option value="HD" selected>HD 720p</option>
                 <option value="FULLHD">Full HD 1080p</option>
@@ -470,13 +474,9 @@ let recordChunks = [];
 let recordStartTime = 0;
 let recordTimerInterval = null;
 
-const RESOLUTIONS = {
-    SD:     { w: 854,  h: 480,  bitrate: 2500000,  label: 'SD 480p' },
-    HD:     { w: 1280, h: 720,  bitrate: 5000000,  label: 'HD 720p' },
-    FULLHD: { w: 1920, h: 1080, bitrate: 10000000, label: 'Full HD 1080p' }
-};
+const QUALITY_BITRATES = { SD: 2500000, HD: 5000000, FULLHD: 10000000 };
+const QUALITY_SHORT_SIDE = { SD: 480, HD: 720, FULLHD: 1080 };
 
-// Tombol yang aktif SETELAH video dimuat. Export sementara dinonaktifkan saat recording.
 const ALL_BTN_IDS = ['btn-play', 'btn-pause', 'btn-reset', 'btn-record', 'btn-export',
     'btn-play-float', 'btn-pause-float', 'btn-reset-float',
     'btn-clear-eraser', 'btn-reset-back', 'btn-reset-front'];
@@ -504,15 +504,91 @@ function roundedRectPath(c, x, y, w, h, r) {
     c.closePath();
 }
 
-function resizeCanvases(w, h) {
-    canvas.width = w; canvas.height = h;
-    maskCanvas.width = w; maskCanvas.height = h;
-    offCanvas.width = w; offCanvas.height = h;
-    maskCtx.clearRect(0, 0, w, h);
+// ---- ASPECT RATIO ----
+function getTargetCanvasDims() {
+    const aspect = $('aspect-select').value;
+    if (aspect === '16:9') return { w: 1280, h: 720 };
+    if (aspect === '9:16') return { w: 720, h: 1280 };
+    // ASLI: berdasarkan video belakang
+    if (backLoaded && videoBack.videoWidth) {
+        const vw = videoBack.videoWidth, vh = videoBack.videoHeight;
+        const maxSide = 1280;
+        const longSide = Math.max(vw, vh);
+        const scale = longSide > maxSide ? maxSide / longSide : 1;
+        return {
+            w: Math.round(vw * scale / 2) * 2,
+            h: Math.round(vh * scale / 2) * 2
+        };
+    }
+    return { w: 1280, h: 720 };
+}
+
+function applyAspectRatio(showStatus = true) {
+    if (!backLoaded) return;
+    const dims = getTargetCanvasDims();
+    const oldW = canvas.width, oldH = canvas.height;
+
+    // Simpan mask lama
+    let oldMaskImg = null;
+    if (maskCanvas.width > 0 && maskCanvas.height > 0 && oldW > 0 && oldH > 0) {
+        oldMaskImg = document.createElement('canvas');
+        oldMaskImg.width = maskCanvas.width;
+        oldMaskImg.height = maskCanvas.height;
+        oldMaskImg.getContext('2d').drawImage(maskCanvas, 0, 0);
+    }
+
+    canvas.width = dims.w;
+    canvas.height = dims.h;
+    maskCanvas.width = dims.w;
+    maskCanvas.height = dims.h;
+    offCanvas.width = dims.w;
+    offCanvas.height = dims.h;
+
+    maskCtx.clearRect(0, 0, dims.w, dims.h);
+    if (oldMaskImg) maskCtx.drawImage(oldMaskImg, 0, 0, dims.w, dims.h);
+
+    updateSliderBounds();
+
+    // Sesuaikan posisi default mask jika pertama kali atau jika sebelumnya belum diubah
+    if (!oldMaskImg) {
+        $('mx').value = Math.round(dims.w * 0.1);
+        $('my').value = Math.round(dims.h * 0.1);
+        $('mw').value = Math.round(dims.w * 0.7);
+        $('mh').value = Math.round(dims.h * 0.7);
+        $('mr').value = 0;
+        ['mx', 'my', 'mw', 'mh', 'mr'].forEach(id => updateSliderLabel(id));
+    }
+
+    drawFrame();
+
+    if (showStatus) {
+        const label = $('aspect-select').value === 'ASLI' ? 'Asli' : $('aspect-select').value;
+        setStatus(`📐 Rasio: ${label} (${dims.w}×${dims.h}).`, 'success');
+    }
+}
+
+function updateSliderBounds() {
+    const w = canvas.width, h = canvas.height;
     $('eraser-size').max = Math.min(w, h);
-    ['mx', 'mw'].forEach(id => $(id).max = w);
-    ['my', 'mh'].forEach(id => $(id).max = h);
+    $('mx').max = w;
+    $('mw').max = w;
+    $('my').max = h;
+    $('mh').max = h;
     $('mr').max = Math.min(w, h) / 2;
+    ['back', 'front'].forEach(p => {
+        $(p + '-x').min = -w; $(p + '-x').max = w;
+        $(p + '-y').min = -h; $(p + '-y').max = h;
+    });
+
+    // Clamp nilai slider lama jika melebihi batas baru
+    if (+$('mx').value > w) $('mx').value = Math.max(0, w - 50);
+    if (+$('my').value > h) $('my').value = Math.max(0, h - 50);
+    if (+$('mw').value > w) $('mw').value = w;
+    if (+$('mh').value > h) $('mh').value = h;
+    if (+$('mr').value > Math.min(w, h) / 2) $('mr').value = 0;
+
+    ['mx', 'my', 'mw', 'mh', 'mr', 'eraser-size',
+     'back-x', 'back-y', 'front-x', 'front-y'].forEach(id => updateSliderLabel(id));
 }
 
 function getFrontRect() {
@@ -563,7 +639,6 @@ function drawVideoTransformed(context, video, prefix) {
     context.drawImage(video, drawX, drawY, drawW, drawH);
 }
 
-// --- RENDER BASE (tanpa handle) untuk feed recorder ---
 function drawBaseScene() {
     const w = canvas.width, h = canvas.height;
     ctx.fillStyle = '#000';
@@ -643,8 +718,6 @@ function drawFrame() {
     drawTransformHandles();
 }
 
-// Render loop: base scene -> copy clean frame ke recordCanvas -> draw handles untuk user
-// Sehingga handle TIDAK muncul di hasil rekaman, tapi tetap terlihat di preview.
 function renderLoop() {
     drawBaseScene();
     if ((isRecording || isExporting) && recordCanvas.width) {
@@ -691,15 +764,13 @@ function loadVideoFile(file, videoEl, boxId) {
 
 function whenBothLoaded() {
     if (!backLoaded || !frontLoaded) return;
-    const ratio = videoBack.videoWidth / videoBack.videoHeight;
-    let w = Math.min(videoBack.videoWidth || 1280, 1280);
-    let h = Math.round(w / ratio);
-    resizeCanvases(w, h);
+    applyAspectRatio(false);
     setAllButtonsEnabled(true);
+    $('aspect-select').disabled = false;
     emptyState.style.display = 'none';
     previewControls.style.display = 'flex';
-    drawFrame();
-    setStatus('✅ Video siap. Pilih tool dan mulai mengedit.', 'success');
+    const dims = getTargetCanvasDims();
+    setStatus(`✅ Video siap. Rasio ${$('aspect-select').value} (${dims.w}×${dims.h}).`, 'success');
 }
 
 $('file-back').onchange = async (e) => {
@@ -713,6 +784,22 @@ $('file-front').onchange = async (e) => {
     catch (err) { setStatus('❌ ' + err.message, 'error'); }
 };
 
+// Aspect ratio selector
+$('aspect-select').onchange = () => {
+    if (isRecording) {
+        $('aspect-select').value = $('aspect-select').dataset.prev || 'ASLI';
+        setStatus('⚠️ Rasio tidak bisa diubah saat merekam.', 'warning');
+        return;
+    }
+    if (isExporting) {
+        $('aspect-select').value = $('aspect-select').dataset.prev || 'ASLI';
+        setStatus('⚠️ Rasio tidak bisa diubah saat export.', 'warning');
+        return;
+    }
+    applyAspectRatio(true);
+    $('aspect-select').dataset.prev = $('aspect-select').value;
+};
+
 document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', () => {
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -722,7 +809,6 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     });
 });
 
-// Tool selector — TIDAK diblokir saat merekam
 document.querySelectorAll('.tool-btn').forEach(btn => {
     btn.addEventListener('click', () => {
         currentTool = btn.dataset.tool;
@@ -731,14 +817,13 @@ document.querySelectorAll('.tool-btn').forEach(btn => {
         cursorOverlay.style.display = 'none';
         dragState = null; isDrawing = false;
         if (currentTool === 'view') { canvas.style.cursor = 'default'; setStatus('Mode Lihat.'); }
-        else if (currentTool === 'transform') { canvas.style.cursor = 'default'; setStatus('Mode Transform: tarik handle sudut atau body.', 'warning'); }
+        else if (currentTool === 'transform') { canvas.style.cursor = 'default'; setStatus('Mode Transform.', 'warning'); }
         else if (currentTool === 'erase') { canvas.style.cursor = 'crosshair'; setStatus('Mode Eraser aktif.', 'warning'); }
         else { canvas.style.cursor = 'crosshair'; setStatus('Mode Restore aktif.', 'success'); }
         if (!rafId) drawFrame();
     });
 });
 
-// Pointer handlers — TIDAK diblokir saat merekam
 function onPointerDown(e) {
     if (!backLoaded || !frontLoaded || isExporting) return;
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -844,7 +929,6 @@ canvas.addEventListener('touchstart', onPointerDown, { passive: false });
 canvas.addEventListener('touchmove', onPointerMove, { passive: false });
 canvas.addEventListener('touchend', onPointerUp);
 
-// Play/Pause/Reset — semua tetap berfungsi saat merekam
 function doPlay() {
     if (!backLoaded || !frontLoaded) return;
     try {
@@ -857,7 +941,6 @@ function doPlay() {
 }
 function doPause() {
     videoBack.pause(); videoFront.pause();
-    // Saat merekam, biarkan loop tetap berjalan agar frame tetap dikirim ke recorder
     if (!isRecording) stopLoop();
     drawFrame();
     setStatus(isRecording ? '⏸ Dijeda (rekaman tetap berjalan).' : '⏸ Dijeda.');
@@ -929,15 +1012,31 @@ function getBestMime() {
     return null;
 }
 
+function getRecordDimensions(quality) {
+    const shortSide = QUALITY_SHORT_SIDE[quality];
+    const aspect = $('aspect-select').value;
+    let w, h;
+    if (aspect === '16:9') {
+        h = shortSide; w = Math.round(shortSide * 16 / 9);
+    } else if (aspect === '9:16') {
+        w = shortSide; h = Math.round(shortSide * 16 / 9);
+    } else {
+        const ca = canvas.width / canvas.height;
+        if (ca >= 1) { h = shortSide; w = Math.round(shortSide * ca); }
+        else { w = shortSide; h = Math.round(shortSide / ca); }
+    }
+    return { w: Math.round(w / 2) * 2, h: Math.round(h / 2) * 2 };
+}
+
 function setupRecordCanvas(quality) {
-    const res = RESOLUTIONS[quality];
-    recordCanvas.width = res.w;
-    recordCanvas.height = res.h;
+    const dims = getRecordDimensions(quality);
+    recordCanvas.width = dims.w;
+    recordCanvas.height = dims.h;
     recordCtx.fillStyle = '#000';
-    recordCtx.fillRect(0, 0, res.w, res.h);
+    recordCtx.fillRect(0, 0, dims.w, dims.h);
     drawBaseScene();
-    recordCtx.drawImage(canvas, 0, 0, res.w, res.h);
-    return res;
+    recordCtx.drawImage(canvas, 0, 0, dims.w, dims.h);
+    return { ...dims, label: quality, bitrate: QUALITY_BITRATES[quality] };
 }
 
 function formatTime(ms) {
@@ -963,10 +1062,7 @@ function startRecording() {
     const stream = recordCanvas.captureStream(30);
 
     try {
-        mediaRecorder = new MediaRecorder(stream, {
-            mimeType,
-            videoBitsPerSecond: res.bitrate
-        });
+        mediaRecorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: res.bitrate });
     } catch (err) {
         setStatus('❌ Gagal membuat recorder: ' + err.message, 'error');
         return;
@@ -978,30 +1074,28 @@ function startRecording() {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `video-mask-${quality}-${Date.now()}.webm`;
+        a.download = `video-mask-${res.label}-${Date.now()}.webm`;
         document.body.appendChild(a); a.click(); document.body.removeChild(a);
         setTimeout(() => URL.revokeObjectURL(url), 2000);
         setStatus(`✅ Rekaman ${res.label} selesai! File telah diunduh.`, 'success');
     };
 
-    // Reset video ke awal & putar (kalau sebelumnya dijeda/ended)
     videoBack.currentTime = 0;
     videoFront.currentTime = 0;
     Promise.all([videoBack.play(), videoFront.play()]).catch(() => {});
-
     if (!rafId) startLoop();
 
     mediaRecorder.start(100);
-
     isRecording = true;
     previewWrapper.classList.add('recording');
     $('btn-record').classList.add('recording');
     $('btn-record').textContent = '⏹ Stop';
 
-    // HANYA tombol Export yang dinonaktifkan (karena akan menjalankan recorder kedua)
+    // Nonaktifkan Export & Aspect selama record
     $('btn-export').disabled = true;
+    $('aspect-select').dataset.prev = $('aspect-select').value;
+    $('aspect-select').disabled = true;
 
-    // Timer
     recordStartTime = Date.now();
     $('record-time').style.display = 'inline-flex';
     $('record-time').textContent = '00:00';
@@ -1011,15 +1105,13 @@ function startRecording() {
         $('record-time').textContent = formatTime(Date.now() - recordStartTime);
     }, 250);
 
-    setStatus(`🔴 Merekam ${res.label} (${res.w}×${res.h})... Semua tool tetap aktif.`, 'warning');
+    setStatus(`🔴 Merekam ${res.label} ${res.w}×${res.h}... Semua tool tetap aktif.`, 'warning');
 }
 
 function stopRecording() {
     if (!isRecording) return;
+    if (mediaRecorder && mediaRecorder.state === 'recording') mediaRecorder.stop();
 
-    if (mediaRecorder && mediaRecorder.state === 'recording') {
-        mediaRecorder.stop();
-    }
     isRecording = false;
     previewWrapper.classList.remove('recording');
     $('btn-record').classList.remove('recording');
@@ -1027,11 +1119,10 @@ function stopRecording() {
     clearInterval(recordTimerInterval);
     $('record-time').style.display = 'none';
 
-    // Re-enable hanya export (yang tadi dinonaktifkan)
     $('btn-export').disabled = false;
+    $('aspect-select').disabled = false;
 
     if (videoBack.paused && videoFront.paused) stopLoop();
-
     setStatus('⏹ Rekaman dihentikan. File sedang diproses...', 'warning');
 }
 
@@ -1044,7 +1135,7 @@ $('btn-record').onclick = () => {
     else startRecording();
 };
 
-// ===== EXPORT (full durasi, tombol dinonaktifkan selama proses) =====
+// ===== EXPORT =====
 $('btn-export').onclick = async () => {
     if (isExporting) return;
     if (isRecording) { setStatus('⚠️ Hentikan rekaman dulu.', 'warning'); return; }
@@ -1059,6 +1150,7 @@ $('btn-export').onclick = async () => {
 
     isExporting = true;
     setAllButtonsEnabled(false);
+    $('aspect-select').disabled = true;
 
     const chunks = [];
     const stream = recordCanvas.captureStream(30);
@@ -1072,16 +1164,17 @@ $('btn-export').onclick = async () => {
         a.download = `video-mask-${quality}-${Date.now()}.webm`;
         document.body.appendChild(a); a.click(); document.body.removeChild(a);
         setTimeout(() => URL.revokeObjectURL(url), 2000);
-        setStatus(`✅ Export ${res.label} selesai!`, 'success');
+        setStatus(`✅ Export ${res.label} ${res.w}×${res.h} selesai!`, 'success');
         isExporting = false;
         setAllButtonsEnabled(true);
+        $('aspect-select').disabled = false;
     };
 
     videoBack.currentTime = 0; videoFront.currentTime = 0;
     await Promise.all([videoBack.play(), videoFront.play()]);
     if (!rafId) startLoop();
     recorder.start(100);
-    setStatus(`🔴 Export ${res.label} (${res.w}×${res.h})... Mohon tunggu.`, 'warning');
+    setStatus(`🔴 Export ${res.label} ${res.w}×${res.h}... Mohon tunggu.`, 'warning');
 
     const stopRec = () => {
         if (recorder.state === 'recording') recorder.stop();
